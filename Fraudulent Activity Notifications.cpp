@@ -32,50 +32,64 @@ vector<string> split(const string&);
  *  2. INTEGER d
  */
 
-
-
-
-
-int activityNotifications(vector<int> expenditure, int d) {
-    int notification = 0;
-    int n= expenditure.size();
-    multiset<int> expedituresorted;
-
-    //filling multiset with numbers from expediture in range i-d
-    for (int i = 0; i < d; ++i) {
-        expedituresorted.insert(expenditure[i]);
+int activityNotifications(vector<int>& expenditure, int d) {
+    int notifications = 0;
+    vector<int> count(201, 0);  //vector for spendings in range 0-200
+    int n = expenditure.size();
+    //push numbers from expenditure to count
+    for (int i = 0; i < d; i++) {
+        count[expenditure[i]]++;
     }
-    for (int i = d; i < n; ++i) {
 
+    for (int i = d; i < n; i++) {
+        //find median
+        int sum = 0;
+        double median = 0.0;
 
-        //find median 
-        double median = 0;
-        auto it = expedituresorted.begin();
+        //d%2==1
         if (d % 2 == 1) {
-            advance(it, d / 2);
-            median = *it;
+            int medianPos = d / 2 + 1;
+            for (int j = 0; j < 201; j++) {
+                sum += count[j];
+                if (sum >= medianPos) {
+                    median = j;
+                    break;
+                }
+            }
         }
+        // d%2==0
         else {
-            advance(it, d / 2 - 1);
-            double lower = *it;
-            advance(it, 1);
-            double upper = *it;
-            median = (lower + upper) / 2.0;
-        }
+            int medianPos1 = d / 2;
+            int medianPos2 = medianPos1 + 1;
+            int median1 = -1, median2 = -1;
 
+            for (int j = 0; j < 201; j++) {
+                sum += count[j];
+                if (median1 == -1 && sum >= medianPos1) {
+                    median1 = j;
+                }
+                if (sum >= medianPos2) {
+                    median2 = j;
+                    break;
+                }
+            }
+            median = (median1 + median2) / 2.0;
+        }
 
         //notification counter
         if (expenditure[i] >= 2 * median) {
-            notification++;
+            notifications++;
         }
 
-        //Erese one element and add one element
-        expedituresorted.erase(expedituresorted.find(expenditure[i - d]));
-        expedituresorted.insert(expenditure[i]);
+        // //Erese one element and add one element
+        count[expenditure[i - d]]--;  
+        count[expenditure[i]]++;     
     }
 
-    return notification;
+    return notifications;
 }
+
+
 
 int main()
 {
